@@ -1,6 +1,9 @@
 package redis.embedded.util;
 
 public enum Architecture {
-    x86,
-    x86_64
+    X86,
+    X86_64,
+    ARM32,
+    ARM64,
+    LOONGARCH64,
 }

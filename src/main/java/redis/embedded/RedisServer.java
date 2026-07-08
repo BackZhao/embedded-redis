@@ -48,4 +48,14 @@ public class RedisServer extends AbstractRedisInstance {
     protected String redisReadyPattern() {
         return REDIS_READY_PATTERN;
     }
+
+    public static void main(String[] args) {
+        String osName = System.getProperty("os.name");
+        String osArch = System.getProperty("os.arch");
+        String osVersion = System.getProperty("os.version");
+
+        System.out.println(osName);
+        System.out.println(osArch);
+        System.out.println(osVersion);
+    }
 }

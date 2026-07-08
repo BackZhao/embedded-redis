@@ -97,11 +97,13 @@ public class RedisServerTest {
     @Test
     public void shouldOverrideDefaultExecutable() throws Exception {
         RedisExecProvider customProvider = RedisExecProvider.defaultProvider()
-                .override(OS.UNIX, Architecture.x86, Resources.getResource("redis-server-2.8.19-32").getFile())
-                .override(OS.UNIX, Architecture.x86_64, Resources.getResource("redis-server-2.8.19").getFile())
-                .override(OS.WINDOWS, Architecture.x86, Resources.getResource("redis-server-2.8.19.exe").getFile())
-                .override(OS.WINDOWS, Architecture.x86_64, Resources.getResource("redis-server-2.8.19.exe").getFile())
-                .override(OS.MAC_OS_X, Resources.getResource("redis-server-2.8.19").getFile());
+                .override(OS.LINUX, Architecture.X86, Resources.getResource("redis-server-2.8.19-linux-x86").getFile())
+                .override(OS.LINUX, Architecture.X86_64, Resources.getResource("redis-server-2.8.19-linux-x86_64").getFile())
+                .override(OS.LINUX, Architecture.ARM32, Resources.getResource("redis-server-2.8.19-linux-arm").getFile())
+                .override(OS.LINUX, Architecture.ARM64, Resources.getResource("redis-server-2.8.19-linux-aarch64").getFile())
+                .override(OS.LINUX, Architecture.LOONGARCH64, Resources.getResource("redis-server-2.8.19-linux-loongarch64").getFile())
+                .override(OS.WINDOWS, Architecture.X86_64, Resources.getResource("redis-server-2.8.19-windows-x86_64.exe").getFile())
+                .override(OS.MACOS, Architecture.X86_64, Resources.getResource("redis-server-2.8.19-mac-x86_64").getFile());
 
         redisServer = new RedisServerBuilder()
                 .redisExecProvider(customProvider)
@@ -111,10 +113,9 @@ public class RedisServerTest {
     @Test(expected = RedisBuildingException.class)
     public void shouldFailWhenBadExecutableGiven() throws Exception {
         RedisExecProvider buggyProvider = RedisExecProvider.defaultProvider()
-                .override(OS.UNIX, "some")
-                .override(OS.WINDOWS, Architecture.x86, "some")
-                .override(OS.WINDOWS, Architecture.x86_64, "some")
-                .override(OS.MAC_OS_X, "some");
+                .override(OS.LINUX, "some")
+                .override(OS.WINDOWS, Architecture.X86_64, "some")
+                .override(OS.MACOS, "some");
 
         redisServer = new RedisServerBuilder()
                 .redisExecProvider(buggyProvider)

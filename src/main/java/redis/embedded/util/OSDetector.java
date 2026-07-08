@@ -2,103 +2,56 @@ package redis.embedded.util;
 
 import redis.embedded.exceptions.OsDetectionException;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 public class OSDetector {
 
     public static OS getOS() {
         String osName = System.getProperty("os.name").toLowerCase();
 
-        if (osName.contains("win")) {
+        if (osName.startsWith("win")) {
             return OS.WINDOWS;
-        } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
-            return OS.UNIX;
-        } else if ("Mac OS X".equalsIgnoreCase(osName)) {
-            return OS.MAC_OS_X;
+        } else if (osName.contains("linux")) {
+            return OS.LINUX;
+        } else if (osName.startsWith("mac")) {
+            return OS.MACOS;
         } else {
-            throw new OsDetectionException("Unrecognized OS: " + osName);
+            throw new OsDetectionException("Unrecognized/Unsupported OS: " + osName);
         }
     }
 
     public static Architecture getArchitecture() {
-        OS os = getOS();
-        switch (os) {
-            case WINDOWS:
-                return getWindowsArchitecture();
-            case UNIX:
-                return getUnixArchitecture();
-            case MAC_OS_X:
-                return getMacOSXArchitecture();
+        String osArch = System.getProperty("os.arch").toLowerCase();
+        switch (osArch) {
+            case "x86":
+            case "i386":
+            case "i486":
+            case "i586":
+            case "i686":
+                return Architecture.X86;
+
+            case "amd64":
+            case "x86_64":
+            case "x64":
+                return Architecture.X86_64;
+
+            case "aarch64":
+            case "arm64":
+                return Architecture.ARM64;
+
+            case "arm":
+            case "armv6":
+            case "armv7":
+            case "armv7l":
+            case "armv8l":
+                return Architecture.ARM32;
+
+            case "loongarch64":
+                return Architecture.LOONGARCH64;
+
+            case "riscv64":
+            case "ppc64le":
+            case "s390x":
             default:
-                throw new OsDetectionException("Unrecognized OS: " + os);
+                throw new OsDetectionException("Unrecognized/Unsupported Architecture: " + osArch);
         }
-    }
-
-    private static Architecture getWindowsArchitecture() {
-        String arch = System.getenv("PROCESSOR_ARCHITECTURE");
-        String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
-
-        if (arch.endsWith("64") || wow64Arch != null && wow64Arch.endsWith("64")) {
-            return Architecture.x86_64;
-        } else {
-            return Architecture.x86;
-        }
-    }
-
-    private static Architecture getUnixArchitecture() {
-        BufferedReader input = null;
-        try {
-            String line;
-            Process proc = Runtime.getRuntime().exec("uname -m");
-            input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            while ((line = input.readLine()) != null) {
-                if (line.length() > 0) {
-                    if (line.contains("64")) {
-                        return Architecture.x86_64;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new OsDetectionException(e);
-        } finally {
-            try {
-                if (input != null) {
-                    input.close();
-                }
-            } catch (Exception ignored) {
-                // ignore
-            }
-        }
-
-        return Architecture.x86;
-    }
-
-    private static Architecture getMacOSXArchitecture() {
-        BufferedReader input = null;
-        try {
-            String line;
-            Process proc = Runtime.getRuntime().exec("sysctl hw");
-            input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            while ((line = input.readLine()) != null) {
-                if (line.length() > 0) {
-                    if ((line.contains("cpu64bit_capable")) && (line.trim().endsWith("1"))) {
-                        return Architecture.x86_64;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new OsDetectionException(e);
-        } finally {
-            try {
-                if (input != null) {
-                    input.close();
-                }
-            } catch (Exception ignored) {
-                // ignore
-            }
-        }
-
-        return Architecture.x86;
     }
 }
